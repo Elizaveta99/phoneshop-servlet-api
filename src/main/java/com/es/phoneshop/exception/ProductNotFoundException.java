@@ -1,5 +1,5 @@
 package com.es.phoneshop.exception;
 
-public class ProductNotFoundException extends Exception {
+public class ProductNotFoundException extends RuntimeException {
 
 }

@@ -1,28 +1,28 @@
-package com.es.phoneshop.model;
+package com.es.phoneshop.model.product;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Date;
 
 public class PriceHistory {
-    private String statDate;
+    private Date startDate;
     private BigDecimal price;
     private Currency currency;
 
     public PriceHistory () { }
 
-    public PriceHistory(String startDate, BigDecimal price, Currency currency) {
-        this.statDate = startDate;
+    public PriceHistory(Date startDate, BigDecimal price, Currency currency) {
+        this.startDate = startDate;
         this.price = price;
         this.currency = currency;
     }
 
-    public String getStatDate() {
-        return statDate;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public void setStatDate(String statDate) {
-        this.statDate = statDate;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public BigDecimal getPrice() {

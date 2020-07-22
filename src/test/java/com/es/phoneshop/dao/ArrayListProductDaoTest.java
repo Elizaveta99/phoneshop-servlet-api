@@ -1,7 +1,8 @@
 package com.es.phoneshop.dao;
 
-import com.es.phoneshop.model.SortField;
-import com.es.phoneshop.model.SortOrder;
+import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.model.sortenum.SortField;
+import com.es.phoneshop.model.sortenum.SortOrder;
 import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,62 +82,64 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testGetProduct() {
+    public void testGetProduct() throws ProductNotFoundException {
         Product actualProduct = productDao.getProduct(15L);
         assertEquals(product1, actualProduct);
 
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testGetProductException() {
+    @Test(expected = ProductNotFoundException.class)
+    public void testGetProductException() throws ProductNotFoundException {
         productDao.getProduct(14L);
 
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = ProductNotFoundException.class)
     public void testIfProductsWithNullPriceOrZeroStockFound() {
         productDao.findProducts("", null, null).stream()
                 .filter(product -> product.getPrice() == null || product.getStock() <= 0)
                 .findAny()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(ProductNotFoundException::new);
 
     }
 
     @Test
     public void testFindProductsByQuery() {
-        List<Product> resultList = new ArrayList<>(Arrays.asList(product5, product4));
+        List<Product> resultList = Arrays.asList(product5, product4);
         assertEquals(resultList, productDao.findProducts("Samsung III", null, null));
 
     }
 
     @Test
-    public void testFindProductsDescriptionSort() {
-        List<Product> resultList1 = new ArrayList<>(Arrays.asList(product2, product6, product4, product5));
-        List<Product> resultList2 = new ArrayList<>(Arrays.asList(product5, product4, product6, product2));
-        List<Product> resultList3 = new ArrayList<>(Arrays.asList(product4, product5));
-        List<Product> resultList4 = new ArrayList<>(Arrays.asList(product5, product4));
-        assertEquals(resultList1, productDao.findProducts("", SortField.description, SortOrder.asc));
-        assertEquals(resultList2, productDao.findProducts("", SortField.description, SortOrder.desc));
-        assertEquals(resultList3, productDao.findProducts("Samsung III", SortField.description, SortOrder.asc));
-        assertEquals(resultList4, productDao.findProducts("Samsung III", SortField.description, SortOrder.desc));
+    public void testFindProductsDescriptionSortAsc() {
+        List<Product> resultList3 = Arrays.asList(product4, product5);
+        assertEquals(resultList3, productDao.findProducts("Samsung III", SortField.DESCRIPTION, SortOrder.ASC));
 
     }
 
     @Test
-    public void testFindProductsPriceSort() {
-        List<Product> resultList1 = new ArrayList<>(Arrays.asList(product4, product5, product6, product2));
-        List<Product> resultList2 = new ArrayList<>(Arrays.asList(product2, product6, product5, product4));
-        List<Product> resultList3 = new ArrayList<>(Arrays.asList(product4, product5, product6));
-        List<Product> resultList4 = new ArrayList<>(Arrays.asList(product6, product5, product4));
-        assertEquals(resultList1, productDao.findProducts("", SortField.price, SortOrder.asc));
-        assertEquals(resultList2, productDao.findProducts("", SortField.price, SortOrder.desc));
-        assertEquals(resultList3, productDao.findProducts("S", SortField.price, SortOrder.asc));
-        assertEquals(resultList4, productDao.findProducts("S", SortField.price, SortOrder.desc));
+    public void testFindProductsDescriptionSortDesc() {
+        List<Product> resultList4 = Arrays.asList(product5, product4);
+        assertEquals(resultList4, productDao.findProducts("Samsung III", SortField.DESCRIPTION, SortOrder.DESC));
 
     }
 
     @Test
-    public void testSaveNewProduct() {
+    public void testFindProductsPriceSortAsc() {
+        List<Product> resultList3 = Arrays.asList(product4, product5, product6);
+        assertEquals(resultList3, productDao.findProducts("S", SortField.PRICE, SortOrder.ASC));
+
+    }
+
+    @Test
+    public void testFindProductsPriceSortDesc() {
+        List<Product> resultList4 = Arrays.asList(product6, product5, product4);
+        assertEquals(resultList4, productDao.findProducts("S", SortField.PRICE, SortOrder.DESC));
+
+    }
+
+    @Test
+    public void testSaveNewProduct() throws ProductNotFoundException {
         productDao.save(productToSave);
         verify(productToSave).setId(anyLong());
         assertTrue(testProducts.contains(productToSave));
@@ -144,7 +147,7 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testSaveExistingProduct() {
+    public void testSaveExistingProduct() throws ProductNotFoundException {
         productDao.save(product1);
         verify(product1, never()).setId(anyLong());
         assertTrue(testProducts.contains(product1));
@@ -152,7 +155,7 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testDeleteProduct() {
+    public void testDeleteProduct() throws ProductNotFoundException {
         long idToDelete = 15L;
         productDao.delete(idToDelete);
         assertTrue(!testProducts.contains(product1));

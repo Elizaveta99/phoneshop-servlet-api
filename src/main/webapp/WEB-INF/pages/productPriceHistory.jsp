@@ -1,3 +1,4 @@
+<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -18,7 +19,7 @@
         <c:forEach var="history" items="${product.historyList}">
             <tr>
                 <td>
-                    ${history.statDate}
+                    <fmt:formatDate pattern="dd-MM-yyyy" value="${history.startDate}" />
                 </td>
                 <td class="price">
                     <fmt:formatNumber value="${history.price}" type="currency" currencySymbol="${history.currency.symbol}"/>

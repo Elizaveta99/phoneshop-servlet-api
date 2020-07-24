@@ -1,7 +1,9 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.model.sortenum.SortField;
+import com.es.phoneshop.model.sortenum.SortOrder;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.dao.ProductDao;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +44,10 @@ public class ProductListPageServletTest {
         List<Product> testProducts = new ArrayList<>();
         testProducts.add(product1);
         testProducts.add(product2);
-        when(productDao.findProducts()).thenReturn(testProducts);
+        when(request.getParameter("queryProduct")).thenReturn("");
+        when(request.getParameter("sort")).thenReturn("description");
+        when(request.getParameter("order")).thenReturn("asc");
+        when(productDao.findProducts("", SortField.DESCRIPTION, SortOrder.ASC)).thenReturn(testProducts);
         when(request.getRequestDispatcher("/WEB-INF/pages/productList.jsp")).thenReturn(requestDispatcher);
 
     }
@@ -50,7 +55,7 @@ public class ProductListPageServletTest {
     @Test
     public void testDoGet() throws ServletException, IOException {
         servlet.doGet(request, response);
-        verify(request).setAttribute("products", productDao.findProducts());
+        verify(request).setAttribute("products", productDao.findProducts("", SortField.DESCRIPTION, SortOrder.ASC));
         verify(requestDispatcher).forward(request, response);
 
     }

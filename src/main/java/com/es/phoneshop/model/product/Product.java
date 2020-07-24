@@ -1,7 +1,7 @@
 package com.es.phoneshop.model.product;
 
 import java.math.BigDecimal;
-import java.util.Currency;
+import java.util.*;
 
 public class Product {
     private Long id;
@@ -13,6 +13,7 @@ public class Product {
     private Currency currency;
     private int stock;
     private String imageUrl;
+    private List<PriceHistory> historyList = new ArrayList<>();
 
     public Product() {
     }
@@ -27,13 +28,14 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
-    public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl) {
+    public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl, List<PriceHistory> historyList) {
         this.code = code;
         this.description = description;
         this.price = price;
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
+        this.historyList = historyList;
     }
 
     public Long getId() {
@@ -92,31 +94,31 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        else if (obj == null)
-            return false;
-        else if (getClass() != obj.getClass())
-            return false;
-
-        Product other = (Product)obj;
-        if (id != other.id)
-            return false;
-        else if (!code.equals(other.code))
-            return false;
-        else if (!description.equals(other.description))
-            return false;
-        else if (!price.equals(other.price))
-            return false;
-        else if (!currency.equals(other.currency))
-            return false;
-        else if (stock != other.stock)
-            return false;
-        else if (!imageUrl.equals(other.imageUrl))
-            return false;
-        return true;
+    public List<PriceHistory> getHistoryList() {
+        return historyList;
     }
 
+    public void setHistoryList(List<PriceHistory> historyList) {
+        this.historyList = historyList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return stock == product.stock &&
+                Objects.equals(id, product.id) &&
+                Objects.equals(code, product.code) &&
+                Objects.equals(description, product.description) &&
+                Objects.equals(price, product.price) &&
+                Objects.equals(currency, product.currency) &&
+                Objects.equals(imageUrl, product.imageUrl) &&
+                Objects.equals(historyList, product.historyList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, code, description, price, currency, stock, imageUrl, historyList);
+    }
 }

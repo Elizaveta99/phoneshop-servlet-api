@@ -15,7 +15,7 @@ public abstract class AbstractProductServlet extends HttpServlet {
 
     private ProductDao productDao;
 
-    private String jspPath;
+    private final String jspPath;
 
     public AbstractProductServlet(String jspPath) {
         this.jspPath = jspPath;

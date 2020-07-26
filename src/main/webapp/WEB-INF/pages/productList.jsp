@@ -8,6 +8,15 @@
   <p>
     Welcome to Expert-Soft training!
   </p>
+  <p>
+    Cart: ${cart}
+  </p>
+  <c:if test="${not empty param.message}">
+    <div class="success">
+        ${param.message}
+    </div>
+    <br>
+  </c:if>
   <form>
     <input type="text" name="queryProduct" value="${param.queryProduct}" placeholder="Search product...">
     <button>Search</button>
@@ -45,5 +54,25 @@
         </td>
       </tr>
     </c:forEach>
+  </table>
+  <p>
+    <b>Recently viewed</b>
+  </p>
+  <table>
+    <tr>
+      <c:forEach var="product" items="${viewHistory.getLastViewedProducts()}">
+        <td>
+          <div>
+            <img class="product-tile" src="${product.imageUrl}">
+          </div>
+          <div>
+              ${product.description}
+          </div>
+          <div>
+            <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
+          </div>
+        </td>
+      </c:forEach>
+    </tr>
   </table>
 </tags:master>

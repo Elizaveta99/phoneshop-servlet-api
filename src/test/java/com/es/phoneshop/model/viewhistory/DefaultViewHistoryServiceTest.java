@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.http.HttpSession;
@@ -16,8 +15,7 @@ import java.util.Deque;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultViewHistoryServiceTest {
@@ -29,7 +27,7 @@ public class DefaultViewHistoryServiceTest {
     private Product product1;
 
     @InjectMocks
-    private final DefaultViewHistoryService defaultViewHistoryService = Mockito.spy(DefaultViewHistoryService.getInstance());
+    private final DefaultViewHistoryService defaultViewHistoryService = DefaultViewHistoryService.getInstance();
 
     @Before
     public void setup() {
@@ -46,9 +44,10 @@ public class DefaultViewHistoryServiceTest {
     @Test
     public void testGetNewViewHistory() {
         when(session.getAttribute(DefaultViewHistoryService.VIEWHISTORY_SESSION_ATTRIBUTE)).thenReturn(null);
-        doReturn(viewHistory).when(defaultViewHistoryService).makeNewViewHistory();
 
-        assertEquals(viewHistory, defaultViewHistoryService.getViewHistory(session));
+        defaultViewHistoryService.getViewHistory(session);
+
+        verify(session).setAttribute(eq(DefaultViewHistoryService.VIEWHISTORY_SESSION_ATTRIBUTE), any(ViewHistory.class));
 
     }
 

@@ -4,12 +4,10 @@ import com.es.phoneshop.dao.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
-import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartService;
 import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.viewhistory.DefaultViewHistoryService;
-import com.es.phoneshop.model.viewhistory.ViewHistory;
 import com.es.phoneshop.model.viewhistory.ViewHistoryService;
 
 import javax.servlet.ServletConfig;
@@ -42,56 +40,65 @@ public class ProductDetailsPageServlet extends AbstractProductServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String productInfo = "";
-        Product product;
-        try {
-            productInfo = request.getPathInfo().substring(1);
-            Long id = Long.valueOf(productInfo);
-            product = productDao.getProduct(id);
-            request.setAttribute("product", product);
-            Cart cart = cartService.getCart(request.getSession());
-            request.setAttribute("cart", cart);
-            viewHistoryService.addProductToViewHistory(request.getSession(), product);
-            ViewHistory viewHistory = viewHistoryService.getViewHistory(request.getSession());
-            request.setAttribute("viewHistory", viewHistory);
-            request.getRequestDispatcher(PRODUCT_DETAILS_JSP).forward(request, response);
-        } catch (ProductNotFoundException | NumberFormatException ex) {
-            request.setAttribute("message", "Product " + productInfo + " not found");
-            response.sendError(404);
-        }
+        Product product = getProductIfExist(request, response);
+        setAttributes(request, product);
+        request.getRequestDispatcher(PRODUCT_DETAILS_JSP).forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String productInfo = request.getPathInfo().substring(1);
-        Long productId = Long.valueOf(productInfo);
-        Cart cart = cartService.getCart(request.getSession());
-        request.setAttribute("cart", cart);
-        ViewHistory viewHistory = viewHistoryService.getViewHistory(request.getSession());
-        request.setAttribute("viewHistory", viewHistory);
+        Long productId = getProductIfExist(request, response).getId();
 
         int quantity;
         try {
             quantity = getQuantity(request);
         } catch (ParseException e) {
-            request.setAttribute("error", "Not a number");
-            doGet(request, response);
+            handleError(request, response, e);
             return;
         }
 
         try {
-            cartService.add(cart, productId, quantity);
+            cartService.add(cartService.getCart(request.getSession()), productId, quantity);
         } catch (OutOfStockException e) {
-            if (e.getStockRequested() <= 0) {
-                request.setAttribute("error", "Can't be negative or zero");
-            } else {
-                request.setAttribute("error", "Out of stock, max available " + e.getStockAvailable());
-            }
-            doGet(request, response);
+            handleError(request, response, e);
             return;
         }
 
         response.sendRedirect(request.getContextPath() + "/products?message=Product " + productId +" added to cart");
+    }
+
+    private void handleError(HttpServletRequest request, HttpServletResponse response, Exception e) throws ServletException, IOException {
+        if (e.getClass().equals(ParseException.class)) {
+            request.setAttribute("error", "Not a number");
+        } else {
+            if (((OutOfStockException) e).getStockRequested() <= 0) {
+                request.setAttribute("error", "Can't be negative or zero");
+            } else {
+                request.setAttribute("error", "Out of stock, max available " + ((OutOfStockException) e).getStockAvailable());
+            }
+        }
+        doGet(request, response);
+    }
+    
+    private Product getProductIfExist(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String productInfo = "";
+        Product product = null;
+        try {
+            productInfo = request.getPathInfo().substring(1);
+            Long id = Long.valueOf(productInfo);
+            product = productDao.getProduct(id);
+        } catch (ProductNotFoundException | NumberFormatException ex) {
+            request.setAttribute("message", "Product " + productInfo + " not found");
+            response.sendError(404);
+        }
+        return product;
+    }
+
+    private void setAttributes(HttpServletRequest request, Product product) {
+        request.setAttribute("product", product);
+        request.setAttribute("cart", cartService.getCart(request.getSession()));
+        viewHistoryService.addProductToViewHistory(request.getSession(), product);
+        request.setAttribute("viewHistory", viewHistoryService.getViewHistory(request.getSession()));
     }
 
     private int getQuantity(HttpServletRequest request) throws ParseException {

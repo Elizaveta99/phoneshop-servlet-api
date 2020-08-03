@@ -28,16 +28,14 @@ public class DefaultCartServiceTest {
     private Product product2;
     @Mock
     private CartItem cartItem1;
-    @Mock
-    private CartItem cartItem2;
 
+    @Spy
     @InjectMocks
     private DefaultCartService defaultCartService;
 
     @Before
     public void setup() {
         when(productDao.getProduct(1L)).thenReturn(product1);
-        defaultCartService = Mockito.spy(new DefaultCartService(productDao));
         when(session.getAttribute(DefaultCartService.CART_SESSION_ATTRIBUTE)).thenReturn(cart);
 
     }
@@ -51,9 +49,10 @@ public class DefaultCartServiceTest {
     @Test
     public void testGetNewCart() {
         when(session.getAttribute(DefaultCartService.CART_SESSION_ATTRIBUTE)).thenReturn(null);
-        doReturn(cart).when(defaultCartService).makeNewCart();
 
-        assertEquals(cart, defaultCartService.getCart(session));
+        defaultCartService.getCart(session);
+
+        verify(session).setAttribute(eq(DefaultCartService.CART_SESSION_ATTRIBUTE), any(Cart.class));
 
     }
 
@@ -76,11 +75,12 @@ public class DefaultCartServiceTest {
         testItems.add(cartItem1);
         when(cart.getItems()).thenReturn(testItems);
         when(cartItem1.getProduct()).thenReturn(product2);
-        doReturn(cartItem2).when(defaultCartService).makeCartItem(product1, 1);
+        when(product2.getId()).thenReturn(2L);
 
+        int size = testItems.size();
         defaultCartService.add(cart, 1L, 1);
 
-        assertTrue(testItems.contains(cartItem2));
+        assertEquals(testItems.size(), size + 1);
 
     }
 

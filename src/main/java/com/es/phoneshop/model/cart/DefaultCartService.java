@@ -11,11 +11,7 @@ import java.util.Optional;
 public class DefaultCartService implements CartService {
 
     protected static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + ".cart";
-    private final ProductDao productDao;
-
-    private DefaultCartService() {
-        productDao = ArrayListProductDao.getInstance();
-    }
+    private ProductDao productDao = ArrayListProductDao.getInstance();
 
     private static class SingletonHelper {
         private static final DefaultCartService INSTANCE = new DefaultCartService();
@@ -25,23 +21,13 @@ public class DefaultCartService implements CartService {
         return DefaultCartService.SingletonHelper.INSTANCE;
     }
 
-    // for tests
-    protected DefaultCartService(ProductDao productDao) {
-        this.productDao = productDao;
-    }
-
     @Override
     public synchronized Cart getCart(HttpSession session) {
         Cart cart = (Cart) session.getAttribute(CART_SESSION_ATTRIBUTE);
         if (cart == null) {
-            session.setAttribute(CART_SESSION_ATTRIBUTE, cart = makeNewCart());
+            session.setAttribute(CART_SESSION_ATTRIBUTE, cart = new Cart());
         }
         return cart;
-    }
-
-    // for tests
-    protected Cart makeNewCart() {
-        return new Cart();
     }
 
     @Override
@@ -52,7 +38,7 @@ public class DefaultCartService implements CartService {
 
         Product product = productDao.getProduct(productId);
         Optional<CartItem> cartItemOptional = cart.getItems().stream()
-                .filter(c -> product.equals(c.getProduct()))
+                .filter(c -> product.getId().equals(c.getProduct().getId()))
                 .findAny();
         int productsAmount = cartItemOptional.map(CartItem::getQuantity).orElse(0);
 
@@ -63,13 +49,7 @@ public class DefaultCartService implements CartService {
         if (cartItemOptional.isPresent()) {
             cartItemOptional.get().setQuantity(productsAmount + quantity);
         } else {
-            cart.getItems().add(makeCartItem(product, quantity));
+            cart.getItems().add(new CartItem(product, quantity));
         }
     }
-
-    // for tests
-    protected CartItem makeCartItem(Product product, int quantity) {
-        return new CartItem(product, quantity);
-    }
-
 }

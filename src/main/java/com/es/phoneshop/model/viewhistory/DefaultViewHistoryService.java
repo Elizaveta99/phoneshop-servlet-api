@@ -23,14 +23,9 @@ public class DefaultViewHistoryService implements ViewHistoryService {
     public synchronized ViewHistory getViewHistory(HttpSession session) {
         ViewHistory viewHistory = (ViewHistory) session.getAttribute(VIEWHISTORY_SESSION_ATTRIBUTE);
         if (viewHistory == null) {
-            session.setAttribute(VIEWHISTORY_SESSION_ATTRIBUTE, viewHistory = makeNewViewHistory());
+            session.setAttribute(VIEWHISTORY_SESSION_ATTRIBUTE, viewHistory = new ViewHistory());
         }
         return viewHistory;
-    }
-
-    // for tests
-    protected ViewHistory makeNewViewHistory() {
-        return new ViewHistory();
     }
 
     @Override

@@ -44,6 +44,16 @@
     <url-pattern>/products/priceHistory/*</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>cart</servlet-name>
+    <servlet-class>com.es.phoneshop.web.CartPageServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>cart</servlet-name>
+    <url-pattern>/cart</url-pattern>
+  </servlet-mapping>
+
   <error-page>
     <error-code>500</error-code>
     <location>/WEB-INF/pages/error.jsp</location>

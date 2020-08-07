@@ -31,15 +31,9 @@ public class DefaultCartService implements CartService {
     }
 
     @Override
-    public synchronized void add(Cart cart, Long productId, int quantity)  throws OutOfStockException {
-        if (quantity <= 0) {
-            throw new OutOfStockException(null, quantity, 0);
-        }
-
+    public synchronized void add(Cart cart, Long productId, int quantity) throws OutOfStockException {
         Product product = productDao.getProduct(productId);
-        Optional<CartItem> cartItemOptional = cart.getItems().stream()
-                .filter(c -> product.getId().equals(c.getProduct().getId()))
-                .findAny();
+        Optional<CartItem> cartItemOptional = getCartItemOptional(cart, quantity, product);
         int productsAmount = cartItemOptional.map(CartItem::getQuantity).orElse(0);
 
         if (product.getStock() < productsAmount + quantity) {
@@ -51,5 +45,27 @@ public class DefaultCartService implements CartService {
         } else {
             cart.getItems().add(new CartItem(product, quantity));
         }
+    }
+
+    @Override
+    public synchronized void update(Cart cart, Long productId, int quantity) throws OutOfStockException {
+        Product product = productDao.getProduct(productId);
+        Optional<CartItem> cartItemOptional = getCartItemOptional(cart, quantity, product);
+
+        if (product.getStock() < quantity) {
+            throw new OutOfStockException(product, quantity, product.getStock());
+        }
+
+        cartItemOptional.ifPresent(cartItem -> cartItem.setQuantity(quantity));
+    }
+
+    private Optional<CartItem> getCartItemOptional(Cart cart, int quantity, Product product) throws OutOfStockException {
+        if (quantity <= 0) {
+            throw new OutOfStockException(null, quantity, 0);
+        }
+
+        return cart.getItems().stream()
+                .filter(c -> product.getId().equals(c.getProduct().getId()))
+                .findAny();
     }
 }

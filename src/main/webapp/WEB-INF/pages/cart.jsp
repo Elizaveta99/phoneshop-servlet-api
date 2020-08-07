@@ -12,43 +12,60 @@
     <div class="success">
         ${param.message}
     </div>
-    <br>
   </c:if>
-  <table>
-    <thead>
-      <tr>
-        <td>Image</td>
-        <td>
-          Description
-        </td>
-        <td class="quantity">
-          Quantity
-        </td>
-        <td class="price">
-          Price
-        </td>
-      </tr>
-    </thead>
-    <c:forEach var="item" items="${cart.items}">
-      <tr>
-        <td>
-          <img class="product-tile" src="${item.product.imageUrl}">
-        </td>
-        <td>
-          <a href="${pageContext.servletContext.contextPath}/products/${item.product.id}">
-            ${item.product.description}
-          </a>
-        </td>
-        <td class="quantity">
-          <fmt:formatNumber value="${item.quantity}" var="quantity" />
-          <input name="quantity" value="${quantity}" class="quantity" />
-        </td>
-        <td class="price">
-          <a href="${pageContext.servletContext.contextPath}/products/priceHistory/${item.product.id}">
-            <fmt:formatNumber value="${item.product.price}" type="currency" currencySymbol="${item.product.currency.symbol}"/>
-          </a>
-        </td>
-      </tr>
-    </c:forEach>
-  </table>
+  <c:if test="${not empty errors}">
+    <div class="error">
+      Error occurred while adding to cart
+    </div>
+  </c:if>
+  <br>
+  <form method="post" action="${pageContext.servletContext.contextPath}/cart">
+    <table>
+      <thead>
+        <tr>
+          <td>Image</td>
+          <td>
+            Description
+          </td>
+          <td class="quantity">
+            Quantity
+          </td>
+          <td class="price">
+            Price
+          </td>
+        </tr>
+      </thead>
+      <c:forEach var="item" items="${cart.items}" varStatus="status">
+        <tr>
+          <td>
+            <img class="product-tile" src="${item.product.imageUrl}">
+          </td>
+          <td>
+            <a href="${pageContext.servletContext.contextPath}/products/${item.product.id}">
+              ${item.product.description}
+            </a>
+          </td>
+          <td class="quantity">
+            <fmt:formatNumber value="${item.quantity}" var="quantity" />
+            <c:set var="error" value="${errors[item.product.id]}" />
+            <input name="quantity" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}" class="quantity" />
+            <c:if test="${not empty error}">
+              <div class="error">
+                ${error}
+              </div>
+            </c:if>
+            <input type="hidden" name="productId" value="${item.product.id}" />
+          </td>
+          <td class="price">
+            <a href="${pageContext.servletContext.contextPath}/products/priceHistory/${item.product.id}">
+              <fmt:formatNumber value="${item.product.price}" type="currency" currencySymbol="${item.product.currency.symbol}"/>
+            </a>
+          </td>
+        </tr>
+      </c:forEach>
+    </table>
+    <p>
+      <button>Update</button>
+    </p>
+  </form>
 </tags:master>

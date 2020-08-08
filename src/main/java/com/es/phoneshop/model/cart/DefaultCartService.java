@@ -68,4 +68,9 @@ public class DefaultCartService implements CartService {
                 .filter(c -> product.getId().equals(c.getProduct().getId()))
                 .findAny();
     }
+
+    @Override
+    public void delete(Cart cart, Long productId) {
+        cart.getItems().removeIf(cartItem -> productId.equals(cartItem.getProduct().getId()));
+    }
 }

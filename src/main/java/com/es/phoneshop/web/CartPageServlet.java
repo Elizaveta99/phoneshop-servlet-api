@@ -6,6 +6,7 @@ import com.es.phoneshop.model.cart.DefaultCartService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -15,14 +16,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class CartPageServlet extends AbstractProductServlet {
+public class CartPageServlet extends HttpServlet {
 
     protected static final String CART_JSP = "/WEB-INF/pages/cart.jsp";
     private CartService cartService;
-
-    public CartPageServlet() {
-        super(CART_JSP);
-    }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -46,14 +43,16 @@ public class CartPageServlet extends AbstractProductServlet {
         String[] quantities = request.getParameterValues("quantity");
         Map<Long, String> errorAttributes = new HashMap<>();
 
-        for (int i = 0; i < productIds.length; i++) {
-            Long productId = getProductIdIfExist(request, response, productIds[i]);
+        if (productIds != null) {
+            for (int i = 0; i < productIds.length; i++) {
+                Long productId = getProductIdIfExist(request, response, productIds[i]);
 
-            try {
-                int quantity = getQuantity(quantities[i], request);
-                cartService.update(cartService.getCart(request.getSession()), productId, quantity);
-            } catch (ParseException | OutOfStockException e) {
-                handleError(errorAttributes, productId, e);
+                try {
+                    int quantity = getQuantity(quantities[i], request);
+                    cartService.update(cartService.getCart(request.getSession()), productId, quantity);
+                } catch (ParseException | OutOfStockException e) {
+                    handleError(errorAttributes, productId, e);
+                }
             }
         }
 

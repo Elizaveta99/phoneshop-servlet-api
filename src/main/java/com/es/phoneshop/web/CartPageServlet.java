@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class CartPageServlet extends HttpServlet {
 
-    protected static final String CART_JSP = "/WEB-INF/pages/cart.jsp";
+    private static final String CART_JSP = "/WEB-INF/pages/cart.jsp";
     private CartService cartService;
 
     @Override

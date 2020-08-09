@@ -64,6 +64,16 @@
     <url-pattern>/cart/deleteCartItem/*</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>minicart</servlet-name>
+    <servlet-class>com.es.phoneshop.web.MiniCartServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>minicart</servlet-name>
+    <url-pattern>/cart/minicart</url-pattern>
+  </servlet-mapping>
+
   <error-page>
     <error-code>500</error-code>
     <location>/WEB-INF/pages/error.jsp</location>

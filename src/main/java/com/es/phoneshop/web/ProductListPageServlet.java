@@ -48,10 +48,11 @@ public class ProductListPageServlet extends HttpServlet {
         if (Objects.nonNull(sortOrder)) {
             sortOrder = sortOrder.toUpperCase();
         }
-        Cart cart = cartService.getCart(request.getSession());
-        request.setAttribute("cart", cart);
+        //Cart cart = cartService.getCart(request.getSession());
+        //request.setAttribute("cart", cart);
         ViewHistory viewHistory = viewHistoryService.getViewHistory(request.getSession());
         request.setAttribute("viewHistory", viewHistory);
+        request.setAttribute("cart", cartService.getCart(request.getSession()));
         request.setAttribute("products",
                 productDao.findProducts(queryProduct,
                         Optional.ofNullable(sortField).map(SortField::valueOf).orElse(null),

@@ -69,6 +69,17 @@
           </td>
         </tr>
       </c:forEach>
+        <tr>
+            <td></td>
+            <td></td>
+            <td class="quantity">Total quantity: ${cart.totalQuantity}</td>
+            <td class="price">
+              Total cost:
+              <p>
+                  <fmt:formatNumber value="${cart.totalCost}" type="currency" currencySymbol="${cart.currency}"/>
+              </p>
+            </td>
+        </tr>
     </table>
     <p>
       <button>Update</button>

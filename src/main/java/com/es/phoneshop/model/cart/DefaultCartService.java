@@ -6,7 +6,9 @@ import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.product.Product;
 
 import javax.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DefaultCartService implements CartService {
 
@@ -45,6 +47,8 @@ public class DefaultCartService implements CartService {
         } else {
             cart.getItems().add(new CartItem(product, quantity));
         }
+        updateTotalQuantity(cart);
+        updateTotalCost(cart);
     }
 
     @Override
@@ -57,6 +61,8 @@ public class DefaultCartService implements CartService {
         }
 
         cartItemOptional.ifPresent(cartItem -> cartItem.setQuantity(quantity));
+        updateTotalQuantity(cart);
+        updateTotalCost(cart);
     }
 
     private Optional<CartItem> getCartItemOptional(Cart cart, int quantity, Product product) throws OutOfStockException {
@@ -72,5 +78,19 @@ public class DefaultCartService implements CartService {
     @Override
     public void delete(Cart cart, Long productId) {
         cart.getItems().removeIf(cartItem -> productId.equals(cartItem.getProduct().getId()));
+        updateTotalQuantity(cart);
+        updateTotalCost(cart);
+    }
+
+    private void updateTotalQuantity(Cart cart) {
+        cart.setTotalQuantity(cart.getItems().stream()
+                .map(CartItem::getQuantity)
+                .mapToInt(Integer::intValue).sum());
+    }
+
+    private void updateTotalCost(Cart cart) {
+        cart.setTotalCost(cart.getItems().stream()
+                .map(cartItem -> new BigDecimal(cartItem.getQuantity()).multiply(cartItem.getProduct().getPrice()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
     }
 }

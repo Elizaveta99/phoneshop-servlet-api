@@ -34,6 +34,7 @@ public abstract class AbstractProductServlet extends HttpServlet {
             productInfo = request.getPathInfo().substring(1);
             Long id = Long.valueOf(productInfo);
             request.setAttribute("product", productDao.getProduct(id));
+            request.setAttribute("cart", cartService.getCart(request.getSession()));
             request.getRequestDispatcher(jspPath).forward(request, response);
         } catch (ProductNotFoundException | NumberFormatException ex) {
             request.setAttribute("message", "Product " + productInfo + " not found");

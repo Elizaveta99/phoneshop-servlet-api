@@ -1,11 +1,7 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
-import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
-import com.es.phoneshop.model.cart.CartService;
-import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.viewhistory.DefaultViewHistoryService;
 import com.es.phoneshop.model.viewhistory.ViewHistoryService;
@@ -15,16 +11,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 
 public class ProductDetailsPageServlet extends AbstractProductServlet {
 
     protected static final String PRODUCT_DETAILS_JSP = "/WEB-INF/pages/productDetails.jsp";
-    private CartService cartService;
     private ViewHistoryService viewHistoryService;
-    private ProductDao productDao;
 
     public ProductDetailsPageServlet() {
         super(PRODUCT_DETAILS_JSP);
@@ -33,9 +25,7 @@ public class ProductDetailsPageServlet extends AbstractProductServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        cartService = DefaultCartService.getInstance();
         viewHistoryService = DefaultViewHistoryService.getInstance();
-        productDao = ArrayListProductDao.getInstance();
     }
 
     @Override
@@ -49,17 +39,10 @@ public class ProductDetailsPageServlet extends AbstractProductServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Long productId = getProductIfExist(request, response).getId();
 
-        int quantity;
         try {
-            quantity = getQuantity(request);
-        } catch (ParseException e) {
-            handleError(request, response, e);
-            return;
-        }
-
-        try {
+            int quantity = getQuantity(request.getParameter("quantity"), request);
             cartService.add(cartService.getCart(request.getSession()), productId, quantity);
-        } catch (OutOfStockException e) {
+        } catch (ParseException | OutOfStockException e) {
             handleError(request, response, e);
             return;
         }
@@ -99,15 +82,5 @@ public class ProductDetailsPageServlet extends AbstractProductServlet {
         request.setAttribute("cart", cartService.getCart(request.getSession()));
         viewHistoryService.addProductToViewHistory(request.getSession(), product);
         request.setAttribute("viewHistory", viewHistoryService.getViewHistory(request.getSession()));
-    }
-
-    private int getQuantity(HttpServletRequest request) throws ParseException {
-        String quantityString = request.getParameter("quantity");
-        NumberFormat numberFormat = getNumberFormat(request.getLocale());
-        return numberFormat.parse(quantityString).intValue();
-    }
-
-    protected NumberFormat getNumberFormat(Locale locale) {
-        return NumberFormat.getInstance(locale);
     }
 }

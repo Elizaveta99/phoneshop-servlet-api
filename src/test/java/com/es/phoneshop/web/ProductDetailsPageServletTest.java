@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.Locale;
 
 import static org.mockito.Mockito.*;
@@ -80,14 +79,13 @@ public class ProductDetailsPageServletTest {
         servlet.doGet(request, response);
 
         verify(request).setAttribute("product", productDao.getProduct(1L));
-        verify(request).setAttribute("cart", cart);
         verify(request).setAttribute("viewHistory", viewHistory);
         verify(requestDispatcher).forward(request, response);
 
     }
 
     @Test
-    public void testProductDetailsDoPostOk() throws ServletException, IOException, OutOfStockException, ParseException {
+    public void testProductDetailsDoPostOk() throws ServletException, IOException, OutOfStockException {
         when(request.getPathInfo()).thenReturn("/1");
         when(product1.getId()).thenReturn(1L);
         doNothing().when(cartService).add(cart, 1L, 1);
@@ -99,14 +97,13 @@ public class ProductDetailsPageServletTest {
     }
 
     @Test
-    public void testProductDetailsDoPostOutOfStock() throws ServletException, IOException, OutOfStockException, ParseException {
+    public void testProductDetailsDoPostOutOfStock() throws ServletException, IOException, OutOfStockException {
         when(request.getPathInfo()).thenReturn("/1");
         when(product1.getId()).thenReturn(1L);
         doThrow(new OutOfStockException(product1, 1, 10)).when(cartService).add(cart, 1L, 1);
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("cart", cart);
         verify(request).setAttribute("viewHistory", viewHistory);
         try {
             cartService.add(cart, 1L, 1);
@@ -118,14 +115,13 @@ public class ProductDetailsPageServletTest {
     }
 
     @Test
-    public void testProductDetailsDoPostOutOfStockNegative() throws ServletException, IOException, OutOfStockException, ParseException {
+    public void testProductDetailsDoPostOutOfStockNegative() throws ServletException, IOException, OutOfStockException {
         when(request.getPathInfo()).thenReturn("/1");
         when(product1.getId()).thenReturn(1L);
         doThrow(new OutOfStockException(product1, -1, 10)).when(cartService).add(cart, 1L, 1);
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("cart", cart);
         verify(request).setAttribute("viewHistory", viewHistory);
         try {
             cartService.add(cart, 1L, 1);
@@ -137,7 +133,7 @@ public class ProductDetailsPageServletTest {
     }
 
     @Test
-    public void testProductDetailsDoPostParseException() throws ServletException, IOException, OutOfStockException, ParseException {
+    public void testProductDetailsDoPostParseException() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getParameter("quantity")).thenReturn("a");
 

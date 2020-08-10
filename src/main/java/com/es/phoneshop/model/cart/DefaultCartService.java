@@ -76,7 +76,7 @@ public class DefaultCartService implements CartService {
     }
 
     @Override
-    public void delete(Cart cart, Long productId) {
+    public synchronized void delete(Cart cart, Long productId) {
         cart.getItems().removeIf(cartItem -> productId.equals(cartItem.getProduct().getId()));
         updateTotalQuantity(cart);
         updateTotalCost(cart);

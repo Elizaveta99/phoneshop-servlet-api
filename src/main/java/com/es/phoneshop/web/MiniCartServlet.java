@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class MiniCartServlet extends HttpServlet {
 
-    private static final String MINICART_JSP = "/WEB-INF/pages/minicart.jsp";
+    protected static final String MINICART_JSP = "/WEB-INF/pages/minicart.jsp";
     private CartService cartService;
 
     @Override

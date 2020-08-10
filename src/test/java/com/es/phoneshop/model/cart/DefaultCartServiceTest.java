@@ -6,13 +6,21 @@ import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 import javax.servlet.http.HttpSession;
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCartServiceTest {
@@ -61,10 +69,12 @@ public class DefaultCartServiceTest {
         when(product1.getStock()).thenReturn(5);
         when(cart.getItems()).thenReturn(Collections.singletonList(cartItem1));
         when(cartItem1.getProduct()).thenReturn(product1);
+        when(cartItem1.getQuantity()).thenReturn(1);
+        when(product1.getPrice()).thenReturn(new BigDecimal(110));
 
         defaultCartService.add(cart, 1L, 1);
 
-        verify(cartItem1).setQuantity(1);
+        verify(cartItem1).setQuantity(2);
 
     }
 
@@ -75,7 +85,10 @@ public class DefaultCartServiceTest {
         testItems.add(cartItem1);
         when(cart.getItems()).thenReturn(testItems);
         when(cartItem1.getProduct()).thenReturn(product2);
+        when(cartItem1.getQuantity()).thenReturn(1);
         when(product2.getId()).thenReturn(2L);
+        when(product2.getPrice()).thenReturn(new BigDecimal(100));
+        when(product1.getPrice()).thenReturn(new BigDecimal(110));
 
         int size = testItems.size();
         defaultCartService.add(cart, 1L, 1);
@@ -95,6 +108,41 @@ public class DefaultCartServiceTest {
         when(product1.getStock()).thenReturn(0);
 
         defaultCartService.add(cart, 1L, 1);
+
+    }
+
+    @Test
+    public void testUpdateOk() throws OutOfStockException {
+        when(product1.getStock()).thenReturn(5);
+        when(cart.getItems()).thenReturn(Collections.singletonList(cartItem1));
+        when(cartItem1.getProduct()).thenReturn(product1);
+        when(cartItem1.getQuantity()).thenReturn(1);
+        when(product1.getPrice()).thenReturn(new BigDecimal(110));
+
+        defaultCartService.update(cart, 1L, 2);
+
+        verify(cartItem1).setQuantity(2);
+
+    }
+
+    @Test(expected = OutOfStockException.class)
+    public void testUpdateOutOfStock() throws OutOfStockException {
+        when(product1.getStock()).thenReturn(0);
+
+        defaultCartService.update(cart, 1L, 2);
+
+    }
+
+    @Test
+    public void testDelete() {
+        List<CartItem> testItems = new ArrayList<>();
+        testItems.add(cartItem1);
+        when(cart.getItems()).thenReturn(testItems);
+        when(cartItem1.getProduct()).thenReturn(product1);
+        when(product1.getId()).thenReturn(1L);
+        defaultCartService.delete(cart, 1L);
+
+        assertFalse(cart.getItems().contains(cartItem1));
 
     }
 

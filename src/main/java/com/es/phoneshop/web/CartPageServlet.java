@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class CartPageServlet extends AbstractProductServlet {
 
-    private static final String CART_JSP = "/WEB-INF/pages/cart.jsp";
+    protected static final String CART_JSP = "/WEB-INF/pages/cart.jsp";
 
     public CartPageServlet() {
         super(CART_JSP);

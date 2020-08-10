@@ -5,9 +5,7 @@
 
 <jsp:useBean id="product" type="com.es.phoneshop.model.product.Product" scope="request" />
 <tags:master pageTitle="Product Details">
-    <p>
-        Cart: ${cart}
-    </p>
+    <br>
     <c:if test="${not empty error}">
         <div class="error">
                 Error occurred while adding to cart

@@ -1,31 +1,37 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.model.cart.CartService;
+import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.model.servlethelper.DefaultServletHelperService;
+import com.es.phoneshop.model.servlethelper.ServletHelperService;
 import com.es.phoneshop.model.viewhistory.DefaultViewHistoryService;
 import com.es.phoneshop.model.viewhistory.ViewHistoryService;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
 
-public class ProductDetailsPageServlet extends AbstractProductServlet {
+public class ProductDetailsPageServlet extends HttpServlet {
 
     protected static final String PRODUCT_DETAILS_JSP = "/WEB-INF/pages/productDetails.jsp";
+    private ProductDao productDao;
+    private CartService cartService;
     private ViewHistoryService viewHistoryService;
+    private ServletHelperService servletHelperService;
 
     public ProductDetailsPageServlet() {
-        super(PRODUCT_DETAILS_JSP);
-    }
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+        productDao = ArrayListProductDao.getInstance();
+        cartService = DefaultCartService.getInstance();
         viewHistoryService = DefaultViewHistoryService.getInstance();
+        servletHelperService = DefaultServletHelperService.getInstance();
     }
 
     @Override
@@ -40,7 +46,7 @@ public class ProductDetailsPageServlet extends AbstractProductServlet {
         Long productId = getProductIfExist(request, response).getId();
 
         try {
-            int quantity = getQuantity(request.getParameter("quantity"), request);
+            int quantity = servletHelperService.getQuantity(request.getParameter("quantity"), request);
             cartService.add(cartService.getCart(request.getSession()), productId, quantity);
         } catch (ParseException | OutOfStockException e) {
             handleError(request, response, e);
@@ -79,7 +85,6 @@ public class ProductDetailsPageServlet extends AbstractProductServlet {
 
     private void setAttributes(HttpServletRequest request, Product product) {
         request.setAttribute("product", product);
-        request.setAttribute("cart", cartService.getCart(request.getSession()));
         viewHistoryService.addProductToViewHistory(request.getSession(), product);
         request.setAttribute("viewHistory", viewHistoryService.getViewHistory(request.getSession()));
     }

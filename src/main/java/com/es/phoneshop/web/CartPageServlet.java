@@ -1,9 +1,13 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.CartService;
+import com.es.phoneshop.model.cart.DefaultCartService;
+import com.es.phoneshop.model.servlethelper.DefaultServletHelperService;
+import com.es.phoneshop.model.servlethelper.ServletHelperService;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -11,17 +15,15 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CartPageServlet extends AbstractProductServlet {
+public class CartPageServlet extends HttpServlet {
 
     protected static final String CART_JSP = "/WEB-INF/pages/cart.jsp";
+    private CartService cartService;
+    private ServletHelperService servletHelperService;
 
     public CartPageServlet() {
-        super(CART_JSP);
-    }
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+        cartService = DefaultCartService.getInstance();
+        servletHelperService = DefaultServletHelperService.getInstance();
     }
 
     @Override
@@ -38,32 +40,20 @@ public class CartPageServlet extends AbstractProductServlet {
 
         if (productIds != null) {
             for (int i = 0; i < productIds.length; i++) {
-                Long productId = getProductIdIfExist(request, response, productIds[i]);
+                Long productId = servletHelperService.getProductIdIfExist(request, response, productIds[i]);
                 try {
-                    int quantity = getQuantity(quantities[i], request);
+                    int quantity = servletHelperService.getQuantity(quantities[i], request);
                     cartService.update(cartService.getCart(request.getSession()), productId, quantity);
                 } catch (ParseException | OutOfStockException e) {
-                    handleErrors(errorAttributes, productId, e);
+                    errorAttributes = servletHelperService.mapErrors(productId, e);
                 }
             }
         }
 
-        tryUpdate(request, response, errorAttributes);
+        handleErrors(request, response, errorAttributes);
     }
 
-    private void handleErrors(Map<Long, String> errorAttributes, Long productId, Exception e) {
-        if (e.getClass().equals(ParseException.class)) {
-            errorAttributes.put(productId, "Not a number");
-        } else {
-            if (((OutOfStockException) e).getStockRequested() <= 0) {
-                errorAttributes.put(productId, "Can't be negative or zero");
-            } else {
-                errorAttributes.put(productId, "Out of stock, max available " + ((OutOfStockException) e).getStockAvailable());
-            }
-        }
-    }
-
-    private void tryUpdate(HttpServletRequest request, HttpServletResponse response, Map<Long, String> errorAttributes) throws IOException, ServletException {
+    private void handleErrors(HttpServletRequest request, HttpServletResponse response, Map<Long, String> errorAttributes) throws IOException, ServletException {
         if (errorAttributes.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/cart?message=Cart updated successfully");
         } else {
@@ -72,5 +62,4 @@ public class CartPageServlet extends AbstractProductServlet {
             request.getRequestDispatcher(CART_JSP).forward(request, response);
         }
     }
-
 }

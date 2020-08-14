@@ -4,6 +4,7 @@ import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartService;
 import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.model.servlethelper.DefaultServletHelperService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,10 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -41,9 +41,8 @@ public class CartPageServletTest {
     private Cart cart;
     @Mock
     private CartService cartService;
-
-    private final Locale locale = Locale.ENGLISH;
-    private final NumberFormat numberFormat = NumberFormat.getInstance(locale);
+    @Mock
+    private DefaultServletHelperService servletHelperService;
 
     @InjectMocks
     @Spy
@@ -55,9 +54,6 @@ public class CartPageServletTest {
         when(cartService.getCart(session)).thenReturn(cart);
         when(request.getRequestDispatcher(CartPageServlet.CART_JSP)).thenReturn(requestDispatcher);
         when(request.getContextPath()).thenReturn("/phoneshop-servlet-api");
-
-        when(request.getLocale()).thenReturn(locale);
-        doReturn(numberFormat).when(servlet).getNumberFormat(locale);
 
     }
 
@@ -77,8 +73,8 @@ public class CartPageServletTest {
 
         when(request.getParameterValues("productId")).thenReturn(productIds);
         when(request.getParameterValues("quantity")).thenReturn(quantities);
-        doNothing().when(cartService).update(cart, 1L, 1);
-        doNothing().when(cartService).update(cart, 2L, 1);
+        doReturn(1L).when(servletHelperService).getProductIdIfExist(request, response, "1");
+        doReturn(2L).when(servletHelperService).getProductIdIfExist(request, response, "2");
 
         servlet.doPost(request, response);
 
@@ -87,77 +83,24 @@ public class CartPageServletTest {
     }
 
     @Test
-    public void testCartPageDoPostOutOfStock() throws ServletException, IOException, OutOfStockException, ParseException {
+    public void testCartPageDoPostError() throws ServletException, IOException, OutOfStockException, ParseException {
         String[] productIds = {"1", "2"};
         String[] quantities = {"1", "1"};
+        Map<Long, String> errorAttributes = new HashMap<>();
+        errorAttributes.put(1L, "");
 
         when(request.getParameterValues("productId")).thenReturn(productIds);
         when(request.getParameterValues("quantity")).thenReturn(quantities);
+        doReturn(1L).when(servletHelperService).getProductIdIfExist(request, response, "1");
+        doReturn(2L).when(servletHelperService).getProductIdIfExist(request, response, "2");
+        doReturn(1).when(servletHelperService).getQuantity("1", request);
         doThrow(new OutOfStockException(product1, 1, 10)).when(cartService).update(cart, 1L, 1);
         doNothing().when(cartService).update(cart, 2L, 1);
-
+        doReturn(errorAttributes).when(servletHelperService).mapErrors(eq(1L), any(OutOfStockException.class));
         servlet.doPost(request, response);
 
-        try {
-            cartService.update(cart, 1L, 1);
-        } catch (OutOfStockException e) {
-            verify(request).setAttribute(eq("errors"), any(HashMap.class));
-            verify(request).setAttribute("cart", cart);
-            verify(requestDispatcher).forward(request, response);
-        }
-
-    }
-
-    @Test
-    public void testCartPageDoPostOutOfStockNegative() throws ServletException, IOException, OutOfStockException, ParseException {
-        String[] productIds = {"1", "2"};
-        String[] quantities = {"1", "1"};
-
-        when(request.getParameterValues("productId")).thenReturn(productIds);
-        when(request.getParameterValues("quantity")).thenReturn(quantities);
-        doThrow(new OutOfStockException(product1, -1, 10)).when(cartService).update(cart, 1L, 1);
-        doNothing().when(cartService).update(cart, 2L, 1);
-
-        servlet.doPost(request, response);
-
-        try {
-            cartService.update(cart, 1L, 1);
-        } catch (OutOfStockException e) {
-            verify(request).setAttribute(eq("errors"), any(HashMap.class));
-            verify(request).setAttribute("cart", cart);
-            verify(requestDispatcher).forward(request, response);
-        }
-
-    }
-
-    @Test
-    public void testCartPageDoPostParseException() throws ServletException, IOException, OutOfStockException, ParseException {
-        String[] productIds = {"1", "2"};
-        String[] quantities = {"pp", "1"};
-
-        when(request.getParameterValues("productId")).thenReturn(productIds);
-        when(request.getParameterValues("quantity")).thenReturn(quantities);
-
-        servlet.doPost(request, response);
-
-        verify(request).setAttribute(eq("errors"), any(HashMap.class));
         verify(request).setAttribute("cart", cart);
         verify(requestDispatcher).forward(request, response);
 
     }
-
-    @Test
-    public void testErrorProductNotFoundWrongIdDoGet() throws ServletException, IOException {
-        String[] productIds = {"pp", "2"};
-        String[] quantities = {"1", "1"};
-
-        when(request.getParameterValues("productId")).thenReturn(productIds);
-        when(request.getParameterValues("quantity")).thenReturn(quantities);
-
-        servlet.doPost(request, response);
-
-        verify(response).sendError(404);
-
-    }
-
 }

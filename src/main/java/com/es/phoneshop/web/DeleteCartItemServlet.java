@@ -1,29 +1,29 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.model.cart.Cart;
+import com.es.phoneshop.model.cart.CartService;
+import com.es.phoneshop.model.cart.DefaultCartService;
+import com.es.phoneshop.model.servlethelper.DefaultServletHelperService;
+import com.es.phoneshop.model.servlethelper.ServletHelperService;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class DeleteCartItemServlet extends AbstractProductServlet {
+public class DeleteCartItemServlet extends HttpServlet {
 
-    protected static final String DELETECARTITEM_JSP = "/WEB-INF/pages/cart.jsp";
+    private CartService cartService;
+    private ServletHelperService servletHelperService;
 
     public DeleteCartItemServlet() {
-        super(DELETECARTITEM_JSP);
-    }
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+        cartService = DefaultCartService.getInstance();
+        servletHelperService = DefaultServletHelperService.getInstance();
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Long productId = getProductIdIfExist(request, response, request.getPathInfo().substring(1));
+        Long productId = servletHelperService.getProductIdIfExist(request, response, request.getPathInfo().substring(1));
         Cart cart = cartService.getCart(request.getSession());
         cartService.delete(cart, productId);
 

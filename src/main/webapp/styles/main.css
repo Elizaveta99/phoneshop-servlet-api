@@ -33,6 +33,9 @@ img.product-tile {
 .success {
   color: green;
 }
+.minicart {
+  font: 400 40px/1.3 'Lobster Two', Helvetica, sans-serif;
+}
 
 /* Page specific styles */
 body.product-list {

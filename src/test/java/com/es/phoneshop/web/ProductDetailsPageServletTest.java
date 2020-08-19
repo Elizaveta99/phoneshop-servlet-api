@@ -6,6 +6,7 @@ import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartService;
 import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.model.servlethelper.DefaultServletHelperService;
 import com.es.phoneshop.model.viewhistory.ViewHistory;
 import com.es.phoneshop.model.viewhistory.ViewHistoryService;
 import org.junit.Before;
@@ -22,9 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 
 import static org.mockito.Mockito.*;
 
@@ -50,9 +49,8 @@ public class ProductDetailsPageServletTest {
     private ViewHistory viewHistory;
     @Mock
     private ViewHistoryService viewHistoryService;
-
-    private final Locale locale = Locale.ENGLISH;
-    private final NumberFormat numberFormat = NumberFormat.getInstance(locale);
+    @Mock
+    private DefaultServletHelperService servletHelperService;
 
     @InjectMocks
     @Spy
@@ -68,9 +66,6 @@ public class ProductDetailsPageServletTest {
         when(request.getRequestDispatcher(ProductDetailsPageServlet.PRODUCT_DETAILS_JSP)).thenReturn(requestDispatcher);
         when(request.getContextPath()).thenReturn("/phoneshop-servlet-api");
 
-        when(request.getLocale()).thenReturn(locale);
-        doReturn(numberFormat).when(servlet).getNumberFormat(locale);
-
     }
 
     @Test
@@ -80,17 +75,15 @@ public class ProductDetailsPageServletTest {
         servlet.doGet(request, response);
 
         verify(request).setAttribute("product", productDao.getProduct(1L));
-        verify(request).setAttribute("cart", cart);
         verify(request).setAttribute("viewHistory", viewHistory);
         verify(requestDispatcher).forward(request, response);
 
     }
 
     @Test
-    public void testProductDetailsDoPostOk() throws ServletException, IOException, OutOfStockException, ParseException {
+    public void testProductDetailsDoPostOk() throws ServletException, IOException, OutOfStockException {
         when(request.getPathInfo()).thenReturn("/1");
         when(product1.getId()).thenReturn(1L);
-        doNothing().when(cartService).add(cart, 1L, 1);
 
         servlet.doPost(request, response);
 
@@ -102,18 +95,13 @@ public class ProductDetailsPageServletTest {
     public void testProductDetailsDoPostOutOfStock() throws ServletException, IOException, OutOfStockException, ParseException {
         when(request.getPathInfo()).thenReturn("/1");
         when(product1.getId()).thenReturn(1L);
+        doReturn(1).when(servletHelperService).getQuantity("1", request);
         doThrow(new OutOfStockException(product1, 1, 10)).when(cartService).add(cart, 1L, 1);
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("cart", cart);
-        verify(request).setAttribute("viewHistory", viewHistory);
-        try {
-            cartService.add(cart, 1L, 1);
-        } catch (OutOfStockException e) {
-            verify(request).setAttribute("error", "Out of stock, max available " + 10);
-            verify(servlet).doGet(request, response);
-        }
+        verify(request).setAttribute("error", "Out of stock, max available " + 10);
+        verify(servlet).doGet(request, response);
 
     }
 
@@ -121,30 +109,27 @@ public class ProductDetailsPageServletTest {
     public void testProductDetailsDoPostOutOfStockNegative() throws ServletException, IOException, OutOfStockException, ParseException {
         when(request.getPathInfo()).thenReturn("/1");
         when(product1.getId()).thenReturn(1L);
+        doReturn(1).when(servletHelperService).getQuantity("1", request);
         doThrow(new OutOfStockException(product1, -1, 10)).when(cartService).add(cart, 1L, 1);
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("cart", cart);
-        verify(request).setAttribute("viewHistory", viewHistory);
-        try {
-            cartService.add(cart, 1L, 1);
-        } catch (OutOfStockException e) {
-            verify(request).setAttribute("error", "Can't be negative or zero");
-            verify(servlet).doGet(request, response);
-        }
+        verify(request).setAttribute("error", "Can't be negative or zero");
+        verify(servlet).doGet(request, response);
 
     }
 
     @Test
-    public void testProductDetailsDoPostParseException() throws ServletException, IOException, OutOfStockException, ParseException {
+    public void testProductDetailsDoPostParseException() throws ServletException, IOException, ParseException {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getParameter("quantity")).thenReturn("a");
+        doThrow(ParseException.class).when(servletHelperService).getQuantity("a", request);
 
         servlet.doPost(request, response);
 
         verify(request).setAttribute("error", "Not a number");
         verify(servlet).doGet(request, response);
+
     }
 
 
@@ -168,5 +153,4 @@ public class ProductDetailsPageServletTest {
         verify(response).sendError(404);
 
     }
-
 }

@@ -2,10 +2,11 @@ package com.es.phoneshop.model.viewhistory;
 
 import com.es.phoneshop.model.product.Product;
 
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-public class ViewHistory {
+public class ViewHistory implements Serializable {
 
     private Deque<Product> lastViewedProducts;
 

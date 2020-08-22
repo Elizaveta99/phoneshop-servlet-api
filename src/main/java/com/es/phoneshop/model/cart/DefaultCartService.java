@@ -8,7 +8,6 @@ import com.es.phoneshop.model.product.Product;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class DefaultCartService implements CartService {
 
@@ -34,7 +33,7 @@ public class DefaultCartService implements CartService {
 
     @Override
     public synchronized void add(Cart cart, Long productId, int quantity) throws OutOfStockException {
-        Product product = productDao.getProduct(productId);
+        Product product = productDao.getItem(productId);
         Optional<CartItem> cartItemOptional = getCartItemOptional(cart, product);
         int productsAmount = cartItemOptional.map(CartItem::getQuantity).orElse(0);
 
@@ -50,7 +49,7 @@ public class DefaultCartService implements CartService {
 
     @Override
     public synchronized void update(Cart cart, Long productId, int quantity) throws OutOfStockException {
-        Product product = productDao.getProduct(productId);
+        Product product = productDao.getItem(productId);
         Optional<CartItem> cartItemOptional = getCartItemOptional(cart, product);
 
         checkQuantity(quantity, quantity, product);
@@ -76,7 +75,7 @@ public class DefaultCartService implements CartService {
 
     @Override
     public synchronized void delete(Cart cart, Long productId) {
-        Product product = productDao.getProduct(productId);
+        Product product = productDao.getItem(productId);
         Optional<CartItem> cartItemOptional = getCartItemOptional(cart, product);
         if (cartItemOptional.isPresent()) {
             cart.getItems().removeIf(cartItem -> productId.equals(cartItem.getProduct().getId()));

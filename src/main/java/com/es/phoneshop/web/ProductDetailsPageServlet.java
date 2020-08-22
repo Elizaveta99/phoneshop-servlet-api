@@ -3,7 +3,7 @@ package com.es.phoneshop.web;
 import com.es.phoneshop.dao.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.cart.CartService;
 import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.Product;
@@ -75,8 +75,8 @@ public class ProductDetailsPageServlet extends HttpServlet {
         try {
             productInfo = request.getPathInfo().substring(1);
             Long id = Long.valueOf(productInfo);
-            product = productDao.getProduct(id);
-        } catch (ProductNotFoundException | NumberFormatException ex) {
+            product = productDao.getItem(id);
+        } catch (ItemNotFoundException | NumberFormatException ex) {
             request.setAttribute("message", "Product " + productInfo + " not found");
             response.sendError(404);
         }

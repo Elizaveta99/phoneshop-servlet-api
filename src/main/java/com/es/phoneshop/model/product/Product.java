@@ -1,10 +1,12 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.model.Item;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 
-public class Product implements Serializable {
+public class Product implements Item, Serializable {
     private Long id;
     private String code;
     private String description;
@@ -39,10 +41,12 @@ public class Product implements Serializable {
         this.historyList = historyList;
     }
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }

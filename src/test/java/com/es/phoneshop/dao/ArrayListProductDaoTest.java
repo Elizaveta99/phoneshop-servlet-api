@@ -1,6 +1,6 @@
 package com.es.phoneshop.dao;
 
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.sortenum.SortField;
 import com.es.phoneshop.model.sortenum.SortOrder;
 import com.es.phoneshop.model.product.Product;
@@ -82,24 +82,24 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testGetProduct() throws ProductNotFoundException {
+    public void testGetProduct() throws ItemNotFoundException {
         Product actualProduct = productDao.getProduct(15L);
         assertEquals(product1, actualProduct);
 
     }
 
-    @Test(expected = ProductNotFoundException.class)
-    public void testGetProductException() throws ProductNotFoundException {
+    @Test(expected = ItemNotFoundException.class)
+    public void testGetProductException() throws ItemNotFoundException {
         productDao.getProduct(14L);
 
     }
 
-    @Test(expected = ProductNotFoundException.class)
+    @Test(expected = ItemNotFoundException.class)
     public void testIfProductsWithNullPriceOrZeroStockFound() {
         productDao.findProducts("", null, null).stream()
                 .filter(product -> product.getPrice() == null || product.getStock() <= 0)
                 .findAny()
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(ItemNotFoundException::new);
 
     }
 
@@ -139,7 +139,7 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testSaveNewProduct() throws ProductNotFoundException {
+    public void testSaveNewProduct() throws ItemNotFoundException {
         productDao.save(productToSave);
         verify(productToSave).setId(anyLong());
         assertTrue(testProducts.contains(productToSave));
@@ -147,7 +147,7 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testSaveExistingProduct() throws ProductNotFoundException {
+    public void testSaveExistingProduct() throws ItemNotFoundException {
         productDao.save(product1);
         verify(product1, never()).setId(anyLong());
         assertTrue(testProducts.contains(product1));
@@ -155,7 +155,7 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testDeleteProduct() throws ProductNotFoundException {
+    public void testDeleteProduct() throws ItemNotFoundException {
         long idToDelete = 15L;
         productDao.delete(idToDelete);
         assertTrue(!testProducts.contains(product1));

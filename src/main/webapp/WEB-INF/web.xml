@@ -74,6 +74,16 @@
     <url-pattern>/cart/minicart</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>checkout</servlet-name>
+    <servlet-class>com.es.phoneshop.web.CheckoutPageServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>checkout</servlet-name>
+    <url-pattern>/checkout</url-pattern>
+  </servlet-mapping>
+
   <error-page>
     <error-code>500</error-code>
     <location>/WEB-INF/pages/error.jsp</location>

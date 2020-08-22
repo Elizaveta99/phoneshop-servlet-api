@@ -1,7 +1,7 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.dao.ProductDao;
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class ProductPriceHistoryPageServletTest {
     @Test
     public void testProductPriceHistoryErrorProductNotFoundIdDoGet() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/100");
-        when(productDao.getProduct(100L)).thenThrow(ProductNotFoundException.class);
+        when(productDao.getProduct(100L)).thenThrow(ItemNotFoundException.class);
 
         servlet.doGet(request, response);
 

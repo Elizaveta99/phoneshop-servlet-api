@@ -2,7 +2,7 @@ package com.es.phoneshop.web;
 
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartService;
 import com.es.phoneshop.model.product.Product;
@@ -136,7 +136,7 @@ public class ProductDetailsPageServletTest {
     @Test
     public void testErrorProductNotFoundIdDoGet() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/100");
-        when(productDao.getProduct(100L)).thenThrow(ProductNotFoundException.class);
+        when(productDao.getProduct(100L)).thenThrow(ItemNotFoundException.class);
 
         servlet.doGet(request, response);
 

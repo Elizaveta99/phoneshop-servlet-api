@@ -11,6 +11,7 @@ public class Order extends Cart implements Item {
     private BigDecimal deliveryCost;
 
     private Long id;
+    private String secureId;
     private String firstName;
     private String lastName;
     private String phone;
@@ -90,5 +91,13 @@ public class Order extends Cart implements Item {
     @Override
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getSecureId() {
+        return secureId;
+    }
+
+    public void setSecureId(String secureId) {
+        this.secureId = secureId;
     }
 }

@@ -113,7 +113,8 @@ public class CheckoutPageServlet extends HttpServlet {
                               Map<String, String> errorAttributes, Order order) throws IOException, ServletException {
         if (errorAttributes.isEmpty()) {
             orderService.placeOrder(order);
-            response.sendRedirect(request.getContextPath() + "/overview/" + order.getId());
+            cartService.clearCart(request.getSession());
+            response.sendRedirect(request.getContextPath() + "/order/overview/" + order.getSecureId());
         } else {
             request.setAttribute("errors", errorAttributes);
             showOrder(request, response, order);

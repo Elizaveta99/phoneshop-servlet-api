@@ -83,6 +83,11 @@ public class DefaultCartService implements CartService {
         recalculateCart(cart);
     }
 
+    @Override
+    public synchronized void clearCart(HttpSession session) {
+        session.setAttribute(CART_SESSION_ATTRIBUTE, new Cart());
+    }
+
     private void recalculateCart(Cart cart) {
         cart.setTotalQuantity(cart.getItems().stream()
                 .map(CartItem::getQuantity)

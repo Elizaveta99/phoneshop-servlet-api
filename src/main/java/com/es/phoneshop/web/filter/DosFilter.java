@@ -12,10 +12,12 @@ public class DosFilter implements Filter {
 
     private DosProtectionService dosProtectionService;
 
-    @Override
-    public void init(FilterConfig filterConfig) {
+    public DosFilter() {
         dosProtectionService = DefaultDosProtectionService.getInstance();
     }
+
+    @Override
+    public void init(FilterConfig filterConfig) { }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -27,7 +29,5 @@ public class DosFilter implements Filter {
     }
 
     @Override
-    public void destroy() {
-
-    }
+    public void destroy() { }
 }

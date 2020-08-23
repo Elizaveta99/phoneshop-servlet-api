@@ -58,7 +58,7 @@ public class ProductDetailsPageServletTest {
 
     @Before
     public void setup() {
-        when(productDao.getProduct(1L)).thenReturn(product1);
+        when(productDao.getItem(1L)).thenReturn(product1);
         when(request.getSession()).thenReturn(session);
         when(cartService.getCart(session)).thenReturn(cart);
         when(viewHistoryService.getViewHistory(session)).thenReturn(viewHistory);
@@ -74,7 +74,7 @@ public class ProductDetailsPageServletTest {
 
         servlet.doGet(request, response);
 
-        verify(request).setAttribute("product", productDao.getProduct(1L));
+        verify(request).setAttribute("product", productDao.getItem(1L));
         verify(request).setAttribute("viewHistory", viewHistory);
         verify(requestDispatcher).forward(request, response);
 
@@ -136,7 +136,7 @@ public class ProductDetailsPageServletTest {
     @Test
     public void testErrorProductNotFoundIdDoGet() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/100");
-        when(productDao.getProduct(100L)).thenThrow(ItemNotFoundException.class);
+        when(productDao.getItem(100L)).thenThrow(ItemNotFoundException.class);
 
         servlet.doGet(request, response);
 

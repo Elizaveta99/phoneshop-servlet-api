@@ -23,12 +23,8 @@ public class DefaultDosProtectionService implements DosProtectionService {
         if (count == null) {
             setFirstTime(ip, session);
         } else {
-            long timeElapsed = 0;
-            if (session.getAttribute("lastTime") != null) {
-                timeElapsed = System.currentTimeMillis() - (long) session.getAttribute("lastTime");
-            } else {
-                session.setAttribute("lastTime", "0");
-            }
+            long lastTime = session.getAttribute("lastTime") == null ? 0 : (long) session.getAttribute("lastTime");
+            long timeElapsed = System.currentTimeMillis() - lastTime;
             if (timeElapsed < 60000) {
                 if (count > THRESHOLD) {
                     return false;

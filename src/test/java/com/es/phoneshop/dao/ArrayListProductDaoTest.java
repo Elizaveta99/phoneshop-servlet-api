@@ -77,20 +77,20 @@ public class ArrayListProductDaoTest {
         testProducts.add(product5);
         testProducts.add(product6);
 
-        productDao.setProductList(testProducts);
+        productDao.setItemList(testProducts);
 
     }
 
     @Test
     public void testGetProduct() throws ItemNotFoundException {
-        Product actualProduct = productDao.getProduct(15L);
+        Product actualProduct = productDao.getItem(15L);
         assertEquals(product1, actualProduct);
 
     }
 
     @Test(expected = ItemNotFoundException.class)
     public void testGetProductException() throws ItemNotFoundException {
-        productDao.getProduct(14L);
+        productDao.getItem(14L);
 
     }
 

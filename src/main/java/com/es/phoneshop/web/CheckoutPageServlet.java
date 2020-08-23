@@ -67,7 +67,7 @@ public class CheckoutPageServlet extends HttpServlet {
                                            Map<String, String> errorAttributes, Order order) {
         String value = request.getParameter("phone");
         if (isNotEmpty("phone", errorAttributes, value)) {
-            String phonePattern = "|^(\\+\\d{1,3}( )?)?(\\d{2}[ ]?)(\\d{3}[- ]?)(\\d{2}[- ]?)\\d{2}$";
+            String phonePattern = "^(\\+\\d{1,3}( )?)?(\\d{2}[ ]?)(\\d{3}[- ]?)(\\d{2}[- ]?)\\d{2}$";
             Pattern pattern = Pattern.compile(phonePattern);
             Matcher matcher = pattern.matcher(value);
             if (matcher.matches()) {

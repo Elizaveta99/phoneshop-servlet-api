@@ -42,7 +42,7 @@ public class DefaultCartServiceTest {
 
     @Before
     public void setup() {
-        when(productDao.getProduct(1L)).thenReturn(product1);
+        when(productDao.getItem(1L)).thenReturn(product1);
         when(session.getAttribute(DefaultCartService.CART_SESSION_ATTRIBUTE)).thenReturn(cart);
 
     }
@@ -58,6 +58,14 @@ public class DefaultCartServiceTest {
         when(session.getAttribute(DefaultCartService.CART_SESSION_ATTRIBUTE)).thenReturn(null);
 
         defaultCartService.getCart(session);
+
+        verify(session).setAttribute(eq(DefaultCartService.CART_SESSION_ATTRIBUTE), any(Cart.class));
+
+    }
+
+    @Test
+    public void testClearCart() {
+        defaultCartService.clearCart(session);
 
         verify(session).setAttribute(eq(DefaultCartService.CART_SESSION_ATTRIBUTE), any(Cart.class));
 

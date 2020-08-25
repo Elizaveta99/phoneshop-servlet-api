@@ -1,13 +1,13 @@
 package com.es.phoneshop.security;
 
-import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultDosProtectionService implements DosProtectionService {
 
     private static final long THRESHOLD = 20;
-    private Map<String, Long> countMap = new ConcurrentHashMap();
+    private Map<String, UserState> countMap = new ConcurrentHashMap();
 
     private static class SingletonHelper {
         private static final DefaultDosProtectionService INSTANCE = new DefaultDosProtectionService();
@@ -17,30 +17,41 @@ public class DefaultDosProtectionService implements DosProtectionService {
         return DefaultDosProtectionService.SingletonHelper.INSTANCE;
     }
 
+    protected static class UserState {
+        private long count;
+        private LocalDateTime lastTime;
+
+        public UserState(long count, LocalDateTime lastTime) {
+            this.count = count;
+            this.lastTime = lastTime;
+        }
+    }
+
     @Override
-    public boolean isAllowed(HttpSession session, String ip) {
-        Long count = countMap.get(ip);
-        if (count == null) {
-            setFirstTime(ip, session);
+    public boolean isAllowed(String ip) {
+        UserState userState = countMap.getOrDefault(ip, null);
+        if (userState == null) {
+            return setFirst(ip);
         } else {
-            long lastTime = session.getAttribute("lastTime") == null ? 0 : (long) session.getAttribute("lastTime");
-            long timeElapsed = System.currentTimeMillis() - lastTime;
-            if (timeElapsed < 60000) {
+            long count = userState.count;
+            if (isBefore(ip)) {
                 if (count > THRESHOLD) {
                     return false;
                 }
-                count++;
+                countMap.get(ip).count++;
+                return true;
             } else {
-                setFirstTime(ip, session);
-                count = 1L;
+                return setFirst(ip);
             }
-            countMap.put(ip, count);
         }
-        return true;
     }
 
-    private void setFirstTime(String ip, HttpSession session) {
-        countMap.put(ip, 1L);
-        session.setAttribute("lastTime", System.currentTimeMillis());
+    protected boolean isBefore (String ip) {
+        return LocalDateTime.now().minusMinutes(1).isBefore(countMap.get(ip).lastTime);
+    }
+
+    private boolean setFirst(String ip) {
+        countMap.put(ip, new UserState(1, LocalDateTime.now()));
+        return  true;
     }
 }

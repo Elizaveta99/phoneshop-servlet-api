@@ -41,26 +41,16 @@ public class DefaultOrderServiceTest {
     }
 
     @Test
-    public void testGetOrder() throws CloneNotSupportedException {
-        when(cartItem1.clone()).thenReturn(cartItem1);
+    public void testCreateOrder() {
         when(cart.getTotalCost()).thenReturn(new BigDecimal(100));
 
-        assertEquals(testItems, defaultOrderService.getOrder(cart).getItems());
-        assertEquals(new BigDecimal(110), defaultOrderService.getOrder(cart).getTotalCost());
-
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testGetOrderException() throws CloneNotSupportedException {
-        when(cartItem1.clone()).thenThrow(new CloneNotSupportedException());
-
-        defaultOrderService.getOrder(cart);
+        assertEquals(new BigDecimal(110), defaultOrderService.createOrder(cart).getTotalCost());
 
     }
 
     @Test
     public void testGetPaymentMethods() {
-        List<PaymentMethod> testItems = Arrays.asList(PaymentMethod.CACHE, PaymentMethod.CREDIT_CARD);
+        List<PaymentMethod> testItems = Arrays.asList(PaymentMethod.CASH, PaymentMethod.CREDIT_CARD);
 
         assertEquals(defaultOrderService.getPaymentMethods(), testItems);
 
@@ -73,6 +63,4 @@ public class DefaultOrderServiceTest {
         verify(order1).setSecureId(anyString());
         verify(orderDao).save(order1);
     }
-
-
 }

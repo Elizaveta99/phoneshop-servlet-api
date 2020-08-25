@@ -1,7 +1,9 @@
 package com.es.phoneshop.model.order;
 
 import com.es.phoneshop.dao.ArrayListOrderDao;
+import com.es.phoneshop.dao.ArrayListProductDao;
 import com.es.phoneshop.dao.OrderDao;
+import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartItem;
 
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 
 public class DefaultOrderService implements OrderService  {
     private OrderDao orderDao = ArrayListOrderDao.getInstance();
+    private ProductDao productDao = ArrayListProductDao.getInstance();
 
     private static class SingletonHelper {
         private static final DefaultOrderService INSTANCE = new DefaultOrderService();
@@ -23,16 +26,11 @@ public class DefaultOrderService implements OrderService  {
     }
 
     @Override
-    public Order getOrder(Cart cart) {
+    public Order createOrder(Cart cart) {
         Order order = new Order();
         order.setItems(cart.getItems().stream()
-                .map(cartItem -> {
-                    try {
-                        return (CartItem)cartItem.clone();
-                    } catch (CloneNotSupportedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList()));
+                .map(CartItem::new)
+                .collect(Collectors.toList()));
 
         order.setSubtotal(cart.getTotalCost());
         order.setDeliveryCost(calculateDeliveryCost());
@@ -49,6 +47,7 @@ public class DefaultOrderService implements OrderService  {
     public void placeOrder(Order order) {
         order.setSecureId(UUID.randomUUID().toString());
         orderDao.save(order);
+        order.getItems().forEach(cartItem -> productDao.updateProductStock(cartItem.getProduct().getId(), cartItem.getQuantity()));
     }
 
     private BigDecimal calculateDeliveryCost() {

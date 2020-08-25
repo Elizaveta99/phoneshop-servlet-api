@@ -1,9 +1,9 @@
 package com.es.phoneshop.dao;
 
 import com.es.phoneshop.exception.ItemNotFoundException;
+import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.sortenum.SortField;
 import com.es.phoneshop.model.sortenum.SortOrder;
-import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -55,6 +56,7 @@ public class ArrayListProductDaoTest {
         when(product1.getPrice()).thenReturn(null);
         testProducts.add(product1);
 
+        when(product2.getId()).thenReturn(1L);
         when(product2.getPrice()).thenReturn(new BigDecimal(1000));
         when(product2.getStock()).thenReturn(30);
         when(product2.getDescription()).thenReturn("Apple iPhone 6");
@@ -160,6 +162,13 @@ public class ArrayListProductDaoTest {
         productDao.delete(idToDelete);
         assertTrue(!testProducts.contains(product1));
 
+    }
+
+    @Test
+    public void testUpdateProductStock() {
+        productDao.updateProductStock(1L, 1);
+
+        verify(product2).setStock(29);
     }
 
 }

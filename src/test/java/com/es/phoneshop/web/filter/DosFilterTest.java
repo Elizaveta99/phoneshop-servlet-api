@@ -12,7 +12,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 import static org.mockito.Mockito.verify;
@@ -27,8 +26,6 @@ public class DosFilterTest {
     @Mock
     private FilterChain chain;
     @Mock
-    private HttpSession session;
-    @Mock
     private DosProtectionService dosProtectionService;
 
     @InjectMocks
@@ -36,14 +33,13 @@ public class DosFilterTest {
 
     @Before
     public void setup() {
-        when((request).getSession()).thenReturn(session);
         when(request.getRemoteAddr()).thenReturn("ip");
 
     }
 
     @Test
     public void testDoFilterOk() throws IOException, ServletException {
-        when(dosProtectionService.isAllowed(session, "ip")).thenReturn(true);
+        when(dosProtectionService.isAllowed("ip")).thenReturn(true);
 
         filter.doFilter(request, response, chain);
 
@@ -53,7 +49,7 @@ public class DosFilterTest {
 
     @Test
     public void testDoFilterError() throws IOException, ServletException {
-        when(dosProtectionService.isAllowed(session, "ip")).thenReturn(false);
+        when(dosProtectionService.isAllowed("ip")).thenReturn(false);
 
         filter.doFilter(request, response, chain);
 

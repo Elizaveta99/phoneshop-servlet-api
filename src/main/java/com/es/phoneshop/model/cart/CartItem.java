@@ -4,7 +4,7 @@ import com.es.phoneshop.model.product.Product;
 
 import java.io.Serializable;
 
-public class CartItem implements Serializable, Cloneable {
+public class CartItem implements Serializable {
 
     private Product product;
     private int quantity;
@@ -14,9 +14,9 @@ public class CartItem implements Serializable, Cloneable {
         this.quantity = quantity;
     }
 
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public CartItem(CartItem cartItem) {
+        this.product = cartItem.product;
+        this.quantity = cartItem.quantity;
     }
 
     @Override

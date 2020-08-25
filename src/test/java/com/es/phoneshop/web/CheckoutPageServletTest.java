@@ -48,13 +48,13 @@ public class CheckoutPageServletTest {
     public void setup() {
         when(request.getSession()).thenReturn(session);
         when(cartService.getCart(session)).thenReturn(cart);
-        when(orderService.getOrder(cart)).thenReturn(order);
+        when(orderService.createOrder(cart)).thenReturn(order);
         when(order.getSecureId()).thenReturn("secureId1");
         when(request.getRequestDispatcher(CheckoutPageServlet.CHECKOUT_JSP)).thenReturn(requestDispatcher);
         when(request.getContextPath()).thenReturn("/phoneshop-servlet-api");
         when(request.getParameter("lastName")).thenReturn("lastName");
         when(request.getParameter("deliveryAddress")).thenReturn("deliveryAddress");
-        when(request.getParameter("paymentMethod")).thenReturn("CACHE");
+        when(request.getParameter("paymentMethod")).thenReturn("CASH");
         doNothing().when(orderService).placeOrder(order);
         doNothing().when(cartService).clearCart(session);
 

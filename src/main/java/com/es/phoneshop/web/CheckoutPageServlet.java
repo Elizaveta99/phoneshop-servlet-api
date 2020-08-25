@@ -28,6 +28,8 @@ public class CheckoutPageServlet extends HttpServlet {
     protected static final String CHECKOUT_JSP = "/WEB-INF/pages/checkout.jsp";
     private CartService cartService;
     private OrderService orderService;
+    private final static String phonePattern = "^(\\+\\d{1,3}( )?)?(\\d{2}[ ]?)(\\d{3}[- ]?)(\\d{2}[- ]?)\\d{2}$";
+    private final static Pattern pattern = Pattern.compile(phonePattern);
 
     public CheckoutPageServlet() {
         cartService = DefaultCartService.getInstance();
@@ -36,13 +38,13 @@ public class CheckoutPageServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        showOrder(request, response, orderService.getOrder(cartService.getCart(request.getSession())));
+        showOrder(request, response, orderService.createOrder(cartService.getCart(request.getSession())));
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Cart cart = cartService.getCart(request.getSession());
-        Order order = orderService.getOrder(cart);
+        Order order = orderService.createOrder(cart);
         Map<String, String> errorAttributes = new HashMap<>();
 
         setRequiredParameter(request, "firstName", errorAttributes, order::setFirstName);
@@ -67,8 +69,6 @@ public class CheckoutPageServlet extends HttpServlet {
                                            Map<String, String> errorAttributes, Order order) {
         String value = request.getParameter("phone");
         if (isNotEmpty("phone", errorAttributes, value)) {
-            String phonePattern = "^(\\+\\d{1,3}( )?)?(\\d{2}[ ]?)(\\d{3}[- ]?)(\\d{2}[- ]?)\\d{2}$";
-            Pattern pattern = Pattern.compile(phonePattern);
             Matcher matcher = pattern.matcher(value);
             if (matcher.matches()) {
                 order.setPhone(value);

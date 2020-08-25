@@ -1,60 +1,71 @@
 package com.es.phoneshop.security;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultDosProtectionServiceTest {
     @Mock
-    private HttpSession session;
-    @Mock
-    private Map<String, Long> countMap;
+    private Map<String, DefaultDosProtectionService.UserState> countMap;
 
+    @Mock
+    private DefaultDosProtectionService.UserState userState;
+
+    @Spy
     @InjectMocks
-    private DefaultDosProtectionService defaultDosProtectionService = DefaultDosProtectionService.getInstance();
+    private DefaultDosProtectionService defaultDosProtectionService;
+
+    @Before
+    public void setup() {
+        when(countMap.get("ip")).thenReturn(userState);
+
+    }
 
     @Test
     public void testIsAllowedFirstTime() {
-        when(countMap.get("ip")).thenReturn(null);
+        when(countMap.getOrDefault("ip", null)).thenReturn(null);
 
-        assertTrue(defaultDosProtectionService.isAllowed(session, "ip"));
+        assertTrue(defaultDosProtectionService.isAllowed("ip"));
 
     }
 
     @Test
     public void testIsAllowedLessThanThreshold() {
-        when(countMap.get("ip")).thenReturn(10L);
-        when(session.getAttribute("lastTime")).thenReturn(System.currentTimeMillis());
+        when(countMap.getOrDefault("ip", null)).thenReturn(new DefaultDosProtectionService.UserState(1, LocalDateTime.now()));
+        doReturn(true).when(defaultDosProtectionService).isBefore("ip");
 
-        assertTrue(defaultDosProtectionService.isAllowed(session, "ip"));
+        assertTrue(defaultDosProtectionService.isAllowed("ip"));
 
     }
 
     @Test
     public void testIsAllowedMoreThanMinute() {
-        when(countMap.get("ip")).thenReturn(10L);
-        when(session.getAttribute("lastTime")).thenReturn(null);
+        when(countMap.getOrDefault("ip", null)).thenReturn(new DefaultDosProtectionService.UserState(1, LocalDateTime.now().minusMinutes(2)));
+        doReturn(false).when(defaultDosProtectionService).isBefore("ip");
 
-        assertTrue(defaultDosProtectionService.isAllowed(session, "ip"));
+        assertTrue(defaultDosProtectionService.isAllowed("ip"));
 
     }
 
     @Test
     public void testIsNotAllowed() {
-        when(countMap.get("ip")).thenReturn(21L);
-        when(session.getAttribute("lastTime")).thenReturn(System.currentTimeMillis());
+        when(countMap.getOrDefault("ip", null)).thenReturn(new DefaultDosProtectionService.UserState(21, LocalDateTime.now()));
+        doReturn(true).when(defaultDosProtectionService).isBefore("ip");
 
-        assertFalse(defaultDosProtectionService.isAllowed(session, "ip"));
+        assertFalse(defaultDosProtectionService.isAllowed("ip"));
 
     }
 }

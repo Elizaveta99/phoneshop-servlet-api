@@ -1,6 +1,5 @@
 package com.es.phoneshop.dao;
 
-import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.sortenum.SortField;
 import com.es.phoneshop.model.sortenum.SortOrder;
@@ -64,12 +63,12 @@ public class ArrayListProductDao extends ArrayListGenericDao<Product> implements
     }
 
     @Override
-    public void delete(Long id) throws ItemNotFoundException {
+    public void updateProductStock(Long id, int quantity) {
         Lock writeLock = rwLock.writeLock();
         writeLock.lock();
         try {
             Product product = getItem(id);
-            itemList.remove(product);
+            product.setStock(product.getStock() - quantity);
         } finally {
             writeLock.unlock();
         }

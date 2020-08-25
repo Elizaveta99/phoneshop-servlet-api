@@ -54,4 +54,16 @@ public abstract class ArrayListGenericDao<T extends Item> implements GenericDao<
             writeLock.unlock();
         }
     }
+
+    @Override
+    public void delete(Long id) throws ItemNotFoundException {
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
+        try {
+            T item = getItem(id);
+            itemList.remove(item);
+        } finally {
+            writeLock.unlock();
+        }
+    }
 }

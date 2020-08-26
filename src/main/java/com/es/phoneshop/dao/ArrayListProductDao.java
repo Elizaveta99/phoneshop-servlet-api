@@ -1,26 +1,17 @@
 package com.es.phoneshop.dao;
 
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.sortenum.SortField;
 import com.es.phoneshop.model.sortenum.SortOrder;
-import com.es.phoneshop.model.product.Product;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-public class ArrayListProductDao implements ProductDao {
-
-    private List<Product> productList;
-    private long productId;
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-
-    private ArrayListProductDao() {
-        productList = new ArrayList<>();
-    }
+public class ArrayListProductDao extends ArrayListGenericDao<Product> implements ProductDao {
 
     private static class SingletonHelper {
         private static final ArrayListProductDao INSTANCE = new ArrayListProductDao();
@@ -30,10 +21,6 @@ public class ArrayListProductDao implements ProductDao {
         return SingletonHelper.INSTANCE;
     }
 
-    protected void setProductList(List<Product> productList) {
-        this.productList = productList;
-    }
-
     private long countWordsAmount(String queryProduct, Product product) {
         if (StringUtils.isBlank(queryProduct)) {
             return 0;
@@ -41,20 +28,6 @@ public class ArrayListProductDao implements ProductDao {
             return Arrays.stream(queryProduct.split(" "))
                     .filter(product.getDescription()::contains)
                     .count();
-        }
-    }
-
-    @Override
-    public Product getProduct(Long id) throws ProductNotFoundException {
-        Lock readLock = rwLock.readLock();
-        readLock.lock();
-        try {
-            return productList.stream()
-                    .filter((product) -> id.equals(product.getId()))
-                    .findAny()
-                    .orElseThrow(ProductNotFoundException::new);
-        } finally {
-            readLock.unlock();
         }
     }
 
@@ -78,7 +51,7 @@ public class ArrayListProductDao implements ProductDao {
         Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
-            return productList.stream()
+            return itemList.stream()
                     .filter(product -> product.getPrice() != null)
                     .filter(product -> product.getStock() > 0)
                     .filter(product -> StringUtils.isBlank(queryProduct) || countWordsAmount(queryProduct, product) > 0)
@@ -90,34 +63,14 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public void save(Product product) throws ProductNotFoundException {
+    public void updateProductStock(Long id, int quantity) {
         Lock writeLock = rwLock.writeLock();
         writeLock.lock();
         try {
-            Long id = product.getId();
-            if (id != null) {
-                productList.remove(getProduct(id));
-                productList.add(product);
-            }
-            else {
-                product.setId(++productId);
-                productList.add(product);
-            }
+            Product product = getItem(id);
+            product.setStock(product.getStock() - quantity);
         } finally {
             writeLock.unlock();
         }
     }
-
-    @Override
-    public void delete(Long id) throws ProductNotFoundException {
-        Lock writeLock = rwLock.writeLock();
-        writeLock.lock();
-        try {
-            Product product = getProduct(id);
-            productList.remove(product);
-        } finally {
-            writeLock.unlock();
-        }
-    }
-
 }

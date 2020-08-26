@@ -1,9 +1,9 @@
 package com.es.phoneshop.dao;
 
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.exception.ItemNotFoundException;
+import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.sortenum.SortField;
 import com.es.phoneshop.model.sortenum.SortOrder;
-import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -55,6 +56,7 @@ public class ArrayListProductDaoTest {
         when(product1.getPrice()).thenReturn(null);
         testProducts.add(product1);
 
+        when(product2.getId()).thenReturn(1L);
         when(product2.getPrice()).thenReturn(new BigDecimal(1000));
         when(product2.getStock()).thenReturn(30);
         when(product2.getDescription()).thenReturn("Apple iPhone 6");
@@ -77,29 +79,29 @@ public class ArrayListProductDaoTest {
         testProducts.add(product5);
         testProducts.add(product6);
 
-        productDao.setProductList(testProducts);
+        productDao.setItemList(testProducts);
 
     }
 
     @Test
-    public void testGetProduct() throws ProductNotFoundException {
-        Product actualProduct = productDao.getProduct(15L);
+    public void testGetProduct() throws ItemNotFoundException {
+        Product actualProduct = productDao.getItem(15L);
         assertEquals(product1, actualProduct);
 
     }
 
-    @Test(expected = ProductNotFoundException.class)
-    public void testGetProductException() throws ProductNotFoundException {
-        productDao.getProduct(14L);
+    @Test(expected = ItemNotFoundException.class)
+    public void testGetProductException() throws ItemNotFoundException {
+        productDao.getItem(14L);
 
     }
 
-    @Test(expected = ProductNotFoundException.class)
+    @Test(expected = ItemNotFoundException.class)
     public void testIfProductsWithNullPriceOrZeroStockFound() {
         productDao.findProducts("", null, null).stream()
                 .filter(product -> product.getPrice() == null || product.getStock() <= 0)
                 .findAny()
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(ItemNotFoundException::new);
 
     }
 
@@ -139,7 +141,7 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testSaveNewProduct() throws ProductNotFoundException {
+    public void testSaveNewProduct() throws ItemNotFoundException {
         productDao.save(productToSave);
         verify(productToSave).setId(anyLong());
         assertTrue(testProducts.contains(productToSave));
@@ -147,7 +149,7 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testSaveExistingProduct() throws ProductNotFoundException {
+    public void testSaveExistingProduct() throws ItemNotFoundException {
         productDao.save(product1);
         verify(product1, never()).setId(anyLong());
         assertTrue(testProducts.contains(product1));
@@ -155,11 +157,18 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
-    public void testDeleteProduct() throws ProductNotFoundException {
+    public void testDeleteProduct() throws ItemNotFoundException {
         long idToDelete = 15L;
         productDao.delete(idToDelete);
         assertTrue(!testProducts.contains(product1));
 
+    }
+
+    @Test
+    public void testUpdateProductStock() {
+        productDao.updateProductStock(1L, 1);
+
+        verify(product2).setStock(29);
     }
 
 }

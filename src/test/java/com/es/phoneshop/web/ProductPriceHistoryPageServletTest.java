@@ -1,7 +1,7 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.dao.ProductDao;
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class ProductPriceHistoryPageServletTest {
 
     @Before
     public void setup() {
-        when(productDao.getProduct(1L)).thenReturn(product1);
+        when(productDao.getItem(1L)).thenReturn(product1);
         when(request.getRequestDispatcher(ProductPriceHistoryPageServlet.PRODUCT_PRICE_HISTORY_JSP)).thenReturn(requestDispatcher);
         when(request.getPathInfo()).thenReturn("/1");
 
@@ -47,7 +47,7 @@ public class ProductPriceHistoryPageServletTest {
     public void testProductPriceHistoryDoGet() throws ServletException, IOException {
         servlet.doGet(request, response);
 
-        verify(request).setAttribute("product", productDao.getProduct(1L));
+        verify(request).setAttribute("product", productDao.getItem(1L));
         verify(requestDispatcher).forward(request, response);
 
     }
@@ -55,7 +55,7 @@ public class ProductPriceHistoryPageServletTest {
     @Test
     public void testProductPriceHistoryErrorProductNotFoundIdDoGet() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/100");
-        when(productDao.getProduct(100L)).thenThrow(ProductNotFoundException.class);
+        when(productDao.getItem(100L)).thenThrow(ItemNotFoundException.class);
 
         servlet.doGet(request, response);
 

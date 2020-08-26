@@ -12,6 +12,10 @@
     </div>
     <br>
   </c:if>
+  <form action="${pageContext.servletContext.contextPath}/advancedSearch">
+    <button>Advanced search</button>
+  </form>
+  <br>
   <form>
     <input type="text" name="queryProduct" value="${param.queryProduct}" placeholder="Search product...">
     <button>Search</button>

@@ -3,6 +3,7 @@ package com.es.phoneshop.web;
 import com.es.phoneshop.dao.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.model.product.Product;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,6 +18,8 @@ import java.util.*;
 public class AdvancedSearchPageServlet extends HttpServlet {
 
     protected static final String ADVANCED_SEARCH_PAGE = "/WEB-INF/pages/advancedSearch.jsp";
+    private final String minPossiblePriceOrStock = "0";
+    private String maxPossiblePrice;
 
     private ProductDao productDao;
 
@@ -25,8 +28,14 @@ public class AdvancedSearchPageServlet extends HttpServlet {
     }
 
     @Override
+    public void init() throws ServletException {
+        super.init();
+        maxPossiblePrice = productDao.getMaxProductPrice().toString();
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("products",new ArrayList<>());
+        request.setAttribute("products", new ArrayList<>());
         request.getRequestDispatcher(ADVANCED_SEARCH_PAGE).forward(request, response);
     }
 
@@ -34,13 +43,13 @@ public class AdvancedSearchPageServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Map<String, String> errorAttributes = new HashMap<>();
 
-        BigDecimal minPrice = getPrice(request,"minPrice", errorAttributes, request.getParameter("minPrice").isEmpty() ? "0" : request.getParameter("minPrice"));
-        BigDecimal maxPrice = getPrice(request,"maxPrice", errorAttributes, request.getParameter("maxPrice").isEmpty() ? "1000" : request.getParameter("maxPrice"));
-        int minStock = getStock(request,"minStock", errorAttributes, request.getParameter("minStock").isEmpty() ? "0" : request.getParameter("minStock"));
+        BigDecimal minPrice = getPrice(request,"minPrice", errorAttributes, StringUtils.isBlank(request.getParameter("minPrice")) ? minPossiblePriceOrStock : request.getParameter("minPrice"));
+        BigDecimal maxPrice = getPrice(request,"maxPrice", errorAttributes, StringUtils.isBlank(request.getParameter("maxPrice")) ? maxPossiblePrice : request.getParameter("maxPrice"));
+        int minStock = getStock(request,"minStock", errorAttributes, StringUtils.isBlank(request.getParameter("minStock")) ? minPossiblePriceOrStock : request.getParameter("minStock"));
 
         if (!errorAttributes.isEmpty()) {
             request.setAttribute("errors", errorAttributes);
-            request.setAttribute("message", "Error occured while filling fields");
+            request.setAttribute("message", "Error occurred while filling fields");
             doGet(request, response);
             return;
         }

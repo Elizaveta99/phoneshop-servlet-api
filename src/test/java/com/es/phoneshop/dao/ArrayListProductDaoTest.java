@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -45,6 +46,12 @@ public class ArrayListProductDaoTest {
 
     @Mock
     private Product product6;
+    @Mock
+    private Product product7;
+    @Mock
+    private Product product8;
+    @Mock
+    private Product product9;
 
     @Mock
     private Product productToSave;
@@ -169,6 +176,54 @@ public class ArrayListProductDaoTest {
         productDao.updateProductStock(1L, 1);
 
         verify(product2).setStock(29);
+    }
+
+    @Test
+    public void testAdvancedFindProductAllParams() {
+        testProducts = new ArrayList<>();
+        when(product7.getCode()).thenReturn("sgs");
+        when(product8.getCode()).thenReturn("sgs2");
+        when(product7.getPrice()).thenReturn(new BigDecimal(200));
+        when(product7.getStock()).thenReturn(20);
+        testProducts.add(product7);
+        testProducts.add(product8);
+        productDao.setItemList(testProducts);
+        List<Product> resultList = Collections.singletonList(product7);
+
+        assertEquals(resultList, productDao.advancedFindProduct("sgs", new BigDecimal(100), new BigDecimal(300), 10));
+
+    }
+
+    @Test
+    public void testAdvancedFindProductMinMaxPriceStockParams() {
+        testProducts = new ArrayList<>();
+        when(product7.getPrice()).thenReturn(new BigDecimal(200));
+        when(product8.getPrice()).thenReturn(new BigDecimal(400));
+        when(product9.getPrice()).thenReturn(new BigDecimal(100));
+        when(product7.getStock()).thenReturn(20);
+        when(product9.getStock()).thenReturn(10);
+        testProducts.add(product7);
+        testProducts.add(product8);
+        testProducts.add(product9);
+        productDao.setItemList(testProducts);
+        List<Product> resultList = Arrays.asList(product7, product9);
+
+        assertEquals(resultList, productDao.advancedFindProduct("", new BigDecimal(100), new BigDecimal(300), 10));
+
+    }
+
+    @Test
+    public void testGetMaxProductPrice() {
+        testProducts = new ArrayList<>();
+        when(product7.getPrice()).thenReturn(new BigDecimal(200));
+        when(product8.getPrice()).thenReturn(new BigDecimal(400));
+        when(product9.getPrice()).thenReturn(new BigDecimal(100));
+        testProducts.add(product7);
+        testProducts.add(product8);
+        testProducts.add(product9);
+        productDao.setItemList(testProducts);
+
+        assertEquals(new BigDecimal(400), productDao.getMaxProductPrice());
     }
 
 }

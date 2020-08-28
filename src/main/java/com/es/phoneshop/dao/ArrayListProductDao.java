@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
@@ -86,6 +87,20 @@ public class ArrayListProductDao extends ArrayListGenericDao<Product> implements
                     .filter(product -> maxPrice.compareTo(product.getPrice()) >= 0)
                     .filter(product -> minStock <= product.getStock())
                     .collect(Collectors.toList());
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Override
+    public BigDecimal getMaxProductPrice() {
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            return itemList.stream()
+                    .max(Comparator.comparing(Product::getPrice))
+                    .orElseThrow(NoSuchElementException::new)
+                    .getPrice();
         } finally {
             readLock.unlock();
         }
